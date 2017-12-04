@@ -2,6 +2,8 @@ import config
 import telebot
 from rhymer import Rhymer
 
+data_samples_count = 20000
+
 """pip install -r requirements.txt"""
 
 bot = telebot.TeleBot(config.bot_token)
@@ -30,9 +32,10 @@ def dataset_1():
     from nltk.corpus import movie_reviews
     return movie_reviews.raw()
 
+
 def dataset_3():
     with open('../data/songs_data_processed_2.txt', 'r', encoding='utf-8') as data_file:
-        return data_file.read()[0:20000]
+        return data_file.read()[:data_samples_count]
 
 if __name__ == '__main__':
 

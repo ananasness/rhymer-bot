@@ -74,8 +74,11 @@ class Rhymer(NewlineText):
         print('The model is ready.')
 
     def in_vocab(self, word):
-        init_state = (BEGIN,) * (self.state_size - 1) + (word,)
-        return init_state in self.chain.model
+        if len(word) > 1:
+            init_state = (BEGIN,) * (self.state_size - 1) + (word,)
+            return init_state in self.chain.model
+
+        return False
 
     def make_sentence_with_end(self, beginning, **kwargs):
         tries = kwargs.get('tries', DEFAULT_TRIES)
@@ -123,18 +126,16 @@ class Rhymer(NewlineText):
                                             'Sorry, try again later :('
 
         tries = 0
-        first_suit = None
+        possible_sent = []
         while not target_sent:
 
             random.shuffle(target_rhymes)
             for rhyme in target_rhymes:
                 gen_sent = self.make_sentence_with_end(rhyme)
                 tries += 1
-                print('\r{}. {}'.format(tries, first_suit), end='')
-                print()
                 if tries > 200:
-                    if first_suit:
-                        target_sent = first_suit
+                    if possible_sent:
+                        target_sent = random.choice(possible_sent)
                         print('Model cannot generate suitable rhyme')
                         break
                     else:
@@ -143,7 +144,8 @@ class Rhymer(NewlineText):
                 # print(sentence_sounds(sent), end=',')
                 # print(gen_sent)
                 if gen_sent != None:
-                    first_suit = gen_sent
+                    possible_sent.append(gen_sent)
+                    print('{}. {}'.format(tries, possible_sent[-1]))
                     if sentence_sounds(gen_sent) == target_sounds_count:
                         target_sent = gen_sent
                         break
@@ -152,10 +154,12 @@ class Rhymer(NewlineText):
 
     def postproc(self, sent):
         print(sent)
+
         while not sent[0].isalpha():
             sent = sent[1:]
 
         sent = sent[0].upper() + sent[1:]
+        sent.replace(' ,', ',')
         return sent
 
 # rhymer = Rhymer(movie_reviews.raw(), state_size=3)

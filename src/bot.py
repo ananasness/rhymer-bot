@@ -30,9 +30,13 @@ def dataset_1():
     from nltk.corpus import movie_reviews
     return movie_reviews.raw()
 
+def dataset_3():
+    with open('../data/songs_data_processed_2.txt', 'r', encoding='utf-8') as data_file:
+        return data_file.read()[0:20000]
+
 if __name__ == '__main__':
 
-    rhymer = Rhymer(dataset_1(), state_size=3, retain_original=True)
+    rhymer = Rhymer(dataset_3(), state_size=3, retain_original=True)
     print('Data processing is finished')
 
     bot.polling(none_stop=True)

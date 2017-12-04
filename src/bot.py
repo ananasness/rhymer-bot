@@ -2,9 +2,10 @@ import config
 import telebot
 from rhymer import Rhymer
 
+"""pip install -r requirements.txt"""
+
 bot = telebot.TeleBot(config.bot_token)
 rhymer = None
-
 
 
 @bot.message_handler(commands=["start"])
@@ -18,11 +19,21 @@ def answer(message):
     bot.send_message(message.chat.id, rhymer.make_rhyme(sent))
 
 
+def dataset_2():
+    with open('../data/chat_bot_data_processed(encoded).txt', 'r', encoding='utf-8') as data_file:
+        return data_file.read()
+
+    return dataset_1()
+
+
+def dataset_1():
+    from nltk.corpus import movie_reviews
+    return movie_reviews.raw()
 
 if __name__ == '__main__':
-    with open('../data/chat_bot_data_processed(encoded).txt', 'r', encoding='utf-8') as data_file:
-        rhymer = Rhymer(data_file.read(), state_size=3)
-        print('Data processing is finished')
+
+    rhymer = Rhymer(dataset_1(), state_size=3, retain_original=True)
+    print('Data processing is finished')
 
     bot.polling(none_stop=True)
 

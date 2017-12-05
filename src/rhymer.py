@@ -14,6 +14,7 @@ DEFAULT_TRIES = 10
 
 
 random.seed(datetime.now())
+#tokenization
 def tokens(sent):
     if not isinstance(sent, str):
         return []
@@ -24,7 +25,8 @@ def tokens(sent):
 
     return tokens
 
-
+#count amount of vowel sounds is a word
+#Example: "salary" has 3 sounds
 def word_sounds(word):
     transcription = pronouncing.phones_for_word(word)
     counter = 0
@@ -36,11 +38,11 @@ def word_sounds(word):
                     counter += 1
     return counter
 
-
+#amount of all sounds in a sentence
 def sentence_sounds(sent):
     return sum([word_sounds(token) for token in tokens(sent)])
 
-
+#reverse input string
 def reverse(s):
     return ' '.join(s.split(' ')[::-1])
 
@@ -48,7 +50,7 @@ def reverse(s):
 class Rhymer(NewlineText):
 
     def __init__(self, input_text, state_size=2, chain=None, parsed_sentences=None, retain_original=True):
-
+        #data preprocessing
         corpus = input_text.lower()
         self.vocab = set(input_text.split(' '))
         print('Number of words in the vocabulary is {}.'. format(len(self.vocab)))
@@ -57,13 +59,11 @@ class Rhymer(NewlineText):
 
         input_text = reverse(corpus)
 
-        # super(NewlineText, self).__init__(corpus, state_size, chain, parsed_sentences, retain_original)
-
-
         can_make_sentences = parsed_sentences is not None or input_text is not None
         self.retain_original = retain_original and can_make_sentences
         self.state_size = state_size
 
+        #create a model
         if self.retain_original:
             self.parsed_sentences = parsed_sentences or list(self.generate_corpus(input_text))
 
@@ -78,7 +78,7 @@ class Rhymer(NewlineText):
         print('The model is ready.')
 
 
-
+    #check whether given word is in a vocabulary of beginning words
     def in_vocab(self, word):
         if len(word) > 1:
             init_state = (BEGIN,) * (self.state_size - 1) + (word,)
@@ -86,6 +86,7 @@ class Rhymer(NewlineText):
 
         return False
 
+    #returns sentences which end with a given word
     def make_sentence_with_end(self, beginning, **kwargs):
         tries = kwargs.get('tries', DEFAULT_TRIES)
         mor = kwargs.get('max_overlap_ratio', DEFAULT_MAX_OVERLAP_RATIO)
@@ -97,15 +98,15 @@ class Rhymer(NewlineText):
             print('only one word as beginning is expected)')
             return None
 
-        # if not self.in_vocab(beginning):
-        #     return None
-
+        #initialize the first state
         init_state = (BEGIN,) * (self.state_size - 1) + (beginning,)
 
         output = None
         prefix = beginning
         max_tries = tries
         tr = 0
+        #try to generate sentences till we have the right one
+        #there is a fixed number of trials to generate a sentence
         while not output and tr < max_tries:
             gen_words = self.chain.walk(init_state)
             tr += 1
@@ -135,15 +136,9 @@ class Rhymer(NewlineText):
         ranked = sorted((nltk.edit_distance(word, w), w) for w in wordlist)
         return [word for (_, word) in ranked]
 
-    def misspell(self, word):
-        signatures = nltk.Index((self.signature(w), w) for w in nltk.corpus.words.words())
-        sig = self.signature(word)
-        if sig in signatures:
-            return self.rank(word, signatures[sig])
-        else:
-            return []
 
-
+    #return list of words which make rhyme with a given word
+    #level specifies number of sounds which should be similar (n-last should sound the same)
     def rhyme(self, inp, level):
         entries = nltk.corpus.cmudict.entries()
         syllables = [(word, syl) for word, syl in entries if word == inp]

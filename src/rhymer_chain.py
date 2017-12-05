@@ -5,6 +5,7 @@ END = "___END__"
 MAX_LEN = 5
 
 class RhymerChain(Chain):
+    #restrictions for words generation
 
     def gen(self, init_state=None):
 

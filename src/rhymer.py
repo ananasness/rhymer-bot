@@ -1,10 +1,12 @@
 from markovify import NewlineText
 from markovify.chain import BEGIN, END
 from nltk.tokenize import word_tokenize
+import nltk
 import random
 from datetime import datetime
 import pronouncing
 from rhymer_chain import RhymerChain
+import re
 
 DEFAULT_MAX_OVERLAP_RATIO = 0.7
 DEFAULT_MAX_OVERLAP_TOTAL = 15
@@ -75,6 +77,8 @@ class Rhymer(NewlineText):
 
         print('The model is ready.')
 
+
+
     def in_vocab(self, word):
         if len(word) > 1:
             init_state = (BEGIN,) * (self.state_size - 1) + (word,)
@@ -114,10 +118,45 @@ class Rhymer(NewlineText):
 
         return output
 
+    # returns list of similar words
+    def signature(self, word):
+        # mappings are done to find similar words is they were misspelled
+
+        mappings = [('ph', 'f'), ('ght', 't'), ('^kn', 'n'), ('qu', 'kw'),
+                    ('[aeiou]+', 'a'), (r'(.)\1', r'\1')]
+        for patt, repl in mappings:
+            word = re.sub(patt, repl, word)
+        pieces = re.findall('[^aeiou]+', word)
+        return ''.join(char for piece in pieces for char in sorted(piece))[:8]
+
+
+    # rank similar words by similarity distance (which word was more likely to appear)
+    def rank(self, word, wordlist):
+        ranked = sorted((nltk.edit_distance(word, w), w) for w in wordlist)
+        return [word for (_, word) in ranked]
+
+    def misspell(self, word):
+        signatures = nltk.Index((self.signature(w), w) for w in nltk.corpus.words.words())
+        sig = self.signature(word)
+        if sig in signatures:
+            return self.rank(word, signatures[sig])
+        else:
+            return []
+
+
+    def rhyme(self, inp, level):
+        entries = nltk.corpus.cmudict.entries()
+        syllables = [(word, syl) for word, syl in entries if word == inp]
+        rhymes = []
+        for (word, syllable) in syllables:
+            rhymes += [word for word, pron in entries if pron[-level:] == syllable[-level:]]
+        return set(rhymes)
+
     def make_rhyme(self, sentence):
         target_sounds_count = sentence_sounds(sentence)
         last_word = tokens(sentence)[-1]
         target_rhymes = pronouncing.rhymes(last_word)
+        target_rhymes.extend(self.rhyme(last_word, 1))
         target_rhymes = [rhyme for rhyme in target_rhymes if self.in_vocab(rhyme)]
         target_sent = None
 
@@ -125,7 +164,7 @@ class Rhymer(NewlineText):
                                                                                      len(target_rhymes),
                                                                                      target_sounds_count))
         if not target_rhymes: target_sent = 'Too difficult last word. ' \
-                                            'Sorry, try again later :('
+                                          'Sorry, try again later :('
 
         tries = 0
         possible_sent = []

@@ -2,6 +2,7 @@ from markovify import NewlineText
 from markovify.chain import BEGIN, END
 from nltk.tokenize import word_tokenize
 import random
+from datetime import datetime
 import pronouncing
 from rhymer_chain import RhymerChain
 
@@ -10,6 +11,7 @@ DEFAULT_MAX_OVERLAP_TOTAL = 15
 DEFAULT_TRIES = 10
 
 
+random.seed(datetime.now())
 def tokens(sent):
     if not isinstance(sent, str):
         return []
@@ -133,7 +135,7 @@ class Rhymer(NewlineText):
             for rhyme in target_rhymes:
                 gen_sent = self.make_sentence_with_end(rhyme)
                 tries += 1
-                if tries > 200:
+                if tries > 100:
                     if possible_sent:
                         target_sent = random.choice(possible_sent)
                         print('Model cannot generate suitable rhyme')
@@ -146,7 +148,7 @@ class Rhymer(NewlineText):
                 if gen_sent != None:
                     possible_sent.append(gen_sent)
                     print('{}. {}'.format(tries, possible_sent[-1]))
-                    if sentence_sounds(gen_sent) == target_sounds_count:
+                    if False: #sentence_sounds(gen_sent) == target_sounds_count:
                         target_sent = gen_sent
                         break
 
@@ -161,5 +163,3 @@ class Rhymer(NewlineText):
         sent = sent[0].upper() + sent[1:]
         sent.replace(' ,', ',')
         return sent
-
-# rhymer = Rhymer(movie_reviews.raw(), state_size=3)

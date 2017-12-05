@@ -13,11 +13,12 @@ rhymer_word = None
 chat_model = {}
 
 
-hello_message = ("""  Hello, I'm rhymer bot. \n
-                      Please, choose the way to make rhyme.\n
-                      /hmm - Hidden Markov model\n
-                      /word_rnn - Word-based LSTM neural network\n
-                      /char_rnn - Char-based LSTM neural network\n""")
+hello_message = (
+""" Hello, I'm rhymer-bot. \n
+Please choose the way to make rhyme.\n
+/hmm - Hidden Markov model\n
+/word_rnn - Word-based LSTM neural network\n""")
+#/char_rnn - Char-based LSTM neural network\n""")
 
 start_message = "Let's make some poem!"
 

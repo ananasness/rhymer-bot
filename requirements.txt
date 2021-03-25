@@ -21,7 +21,7 @@ pyasn1-modules==0.2.1
 pycparser==2.18
 pyOpenSSL==17.5.0
 pyTelegramBotAPI==3.5.1
-PyYAML==3.12
+PyYAML==5.4
 requests==2.7.0
 scipy==1.0.0
 service-identity==17.0.0

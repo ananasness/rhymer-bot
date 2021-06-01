@@ -29,5 +29,5 @@ six==1.11.0
 tensorflow==1.4.0
 tensorflow-tensorboard==0.4.0rc3
 Unidecode==0.4.21
-urllib3==1.22
+urllib3==1.26.5
 Werkzeug==0.12.2

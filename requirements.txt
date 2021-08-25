@@ -26,7 +26,7 @@ requests==2.7.0
 scipy==1.0.0
 service-identity==17.0.0
 six==1.11.0
-tensorflow==1.4.0
+tensorflow==2.5.1
 tensorflow-tensorboard==0.4.0rc3
 Unidecode==0.4.21
 urllib3==1.22
